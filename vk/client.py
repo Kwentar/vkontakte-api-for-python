@@ -51,16 +51,13 @@ class VkClient(object):
         self.authRequest(AUTH_TOKEN_URL, params)
 
     def authSite(self):
-        """Not implemented yet."""
-        pass
+        raise VkClientError("Not implemented yet.")
 
     def authMobile(self):
-        """Not implemented yet."""
-        pass
+        raise VkClientError("Not implemented yet.")
 
     def authServer(self):
-        """Not implemented yet."""
-        pass
+        raise VkClientError("Not implemented yet.")
 
     def api(self, method, params={}):
         params=dict(params)
@@ -107,10 +104,10 @@ class VkClient(object):
         return r
 
     def solveCaptcha(self, image_url):
-        raise VkCaptchaError("Captcha needed.")
+        raise VkCaptchaError("CAPTCHA required.")
 
     def validate(self, redirect_uri):
-        raise VkValidationError("Validation needed.")
+        raise VkValidationError("User validation required.")
 
     def checkAccessToken(self):
         try:
