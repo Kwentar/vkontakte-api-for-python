@@ -9,22 +9,20 @@
 
 Постим геев на стеночку в уютненький контактик.
 
-<code>
-# -*- coding: utf-8 -*-
-from vk.client import *
-
-# Притворяемся официальным приложением для iPhone.
-vk=VkClient(client_id=3140623, client_secret='VeWdmVclDCtn6ihuP1nt')
-# Авторизуемся напрямую.
-vk.authDirect('+79876543210', 'pass123')
-u=vk.photos.getWallUploadServer()['upload_url']
-# Файлы можно грузить по ссылке.
-r=vk.upload(u, {'photo': 'http://sleek25.blog.pl/files/2014/06/tumblr_mumab5h6GF1qhbwg1o1_500.png'})
-r=vk.photos.saveWallPhoto(r)
-attachment='photo{owner_id}_{id}'.format(**r[0])
-# Постим запись на стену.
-vk.wall.post(message=u"\u2764\u2764\u2764", attachments=attachment)
-</code>
+    # -*- coding: utf-8 -*-
+    from vk.client import *
+    
+    # Притворяемся официальным приложением для iPhone.
+    vk=VkClient(client_id=3140623, client_secret='VeWdmVclDCtn6ihuP1nt')
+    # Авторизуемся напрямую.
+    vk.authDirect('+79876543210', 'pass123')
+    u=vk.photos.getWallUploadServer()['upload_url']
+    # Файлы можно грузить по ссылке.
+    r=vk.upload(u, {'photo': 'http://sleek25.blog.pl/files/2014/06/tumblr_mumab5h6GF1qhbwg1o1_500.png'})
+    r=vk.photos.saveWallPhoto(r)
+    attachment='photo{owner_id}_{id}'.format(**r[0])
+    # Постим запись на стену.
+    vk.wall.post(message=u"\u2764\u2764\u2764", attachments=attachment)
 
 Заметьте, что к методам API Вконтакте можно обращаться как к свойствам 
 экземпляра VkClient.
