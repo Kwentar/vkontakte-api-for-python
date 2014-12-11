@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
+import sys
 import requests
 import datetime
 import re
 import os
 
-USER_AGENT='VkClient v1.0'
+USER_AGENT="VkClient v1.0 (Python {}.{}.{})".format(*sys.version_info[:3])
 API_VERSION=5.27
 
 class VkClient(object):
     user_id=0
     expires_at=None
-    session=requests.Session()
+    session=requests.session()
     session.headers['User-Agent']=USER_AGENT
 
     def __init__(self, client_id=0,  client_secret='', permissions='',\
