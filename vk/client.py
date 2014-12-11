@@ -35,7 +35,7 @@ class VkClient(object):
         if captcha_key:
             params['captcha_key']=captcha_key
         params['grant_type']='password'
-        params['test_redirect_uri']=1
+        # params['test_redirect_uri']=1
         r=self.session.post('https://oauth.vk.com/token', data=params).json()
         if 'error' in r:        
             if r['error'] == 'need_captcha':
@@ -69,7 +69,7 @@ class VkClient(object):
             url='https://oauth.vk.com' + m.group(0)
             r=self.session.get(url)
             if r.url == 'https://oauth.vk.com/blank.html?success=1':
-                print "User validation passed."
+                # print "User validation passed."
                 return
         raise VkValidationError("User validation failed.")
 
