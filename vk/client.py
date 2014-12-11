@@ -8,7 +8,6 @@ import time
 
 USER_AGENT="VkClient v1.05 (Python {}.{}.{})".format(*sys.version_info[:3])
 API_VERSION=5.27
-API_DELAY=0.21
 
 class VkClient(object):
     user_id=0
@@ -23,7 +22,7 @@ class VkClient(object):
         self.permissions=permissions
         self.access_token=access_token
         self.api_version=api_version or API_VERSION
-        self.api_delay=api_delay or API_DELAY
+        self.api_delay=api_delay
 
     # https://vk.com/dev/auth_direct
     def authDirect(self, username, password, captcha_sid=0, captcha_key=0):
@@ -85,7 +84,7 @@ class VkClient(object):
         return False
 
     def api(self, method, params={}):
-        # Ждем.
+        # Принрудительна задержка выполнения запроса.
         if self.api_delay:
             time.sleep(self.api_delay)
         params=dict(params)
