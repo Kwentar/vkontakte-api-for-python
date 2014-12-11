@@ -5,7 +5,7 @@ import datetime
 import re
 import os
 
-USER_AGENT="VkClient v1.0 (Python {}.{}.{})".format(*sys.version_info[:3])
+USER_AGENT="VkClient v1.05 (Python {}.{}.{})".format(*sys.version_info[:3])
 API_VERSION=5.27
 
 class VkClient(object):
@@ -22,32 +22,34 @@ class VkClient(object):
         self.access_token=access_token
         self.api_version=api_version
 
-    def authRequest(self, url, params):
-        params=dict(params)
-        r=self.session.post(url, data=params).json()
-        if 'error' in r:        
-            if r['error'] == 'need_captcha':
-                self.addCaptchaParams(params, r)
-                return self.authRequest(url, params)
-            if r['error'] == 'need_validation':
-                return self.validate(r['redirect_uri'])
-            raise VkAuthorizationError(r['error'], r['error_description'])
-        self.access_token=r['access_token']
-        if 'user_id' in r:
-            self.user_id=r['user_id']
-        if r.get('expires_in') > 0:
-            self.expires_at=datetime.datetime.now() +\
-                            datetime.timedelta(seconds=r['expires_in'])
-
-    def authDirect(self, username, password):
+    # https://vk.com/dev/auth_direct
+    def authDirect(self, username, password, captcha_sid=0, captcha_key=0):
         params={}
         params['username']=username
         params['password']=password
         params['client_id']=self.client_id
         params['client_secret']=self.client_secret
         params['scope']=self.permissions
+        if captcha_sid:
+            params['captcha_sid']=captcha_sid
+        if captcha_key:
+            params['captcha_key']=captcha_key
         params['grant_type']='password'
-        self.authRequest('https://oauth.vk.com/token', params)
+        params['test_redirect_uri']=1
+        r=self.session.post('https://oauth.vk.com/token', data=params).json()
+        if 'error' in r:        
+            if r['error'] == 'need_captcha':
+                captcha_sid=r['captcha_sid']
+                captcha_key=self.solveCaptcha(r['captcha_img'])
+            elif r['error'] == 'need_validation':
+                self.authValidate(r['redirect_uri'])
+            else:
+                raise VkAuthorizationError("{error}: {error_description}"\
+                                           .format(**r))
+            return self.authDirect(username, password, captcha_sid,
+                                   captcha_key)
+        self.access_token=r['access_token']
+        self.user_id=r['user_id']
 
     def authSite(self):
         raise VkClientError("Not implemented yet.")
@@ -57,6 +59,19 @@ class VkClient(object):
 
     def authServer(self):
         raise VkClientError("Not implemented yet.")
+
+    def authValidate(self, redirect_uri):
+        u"""При авторизации из подозрительного места нужно открыть ссылку в 
+        браузере и нажать на кнопку, что легко эмулируется."""
+        r=self.session.get(redirect_uri)
+        m=re.search(r'/security_check\?[^"]+', r.text)
+        if m:
+            url='https://oauth.vk.com' + m.group(0)
+            r=self.session.get(url)
+            if r.url == 'https://oauth.vk.com/blank.html?success=1':
+                print "User validation passed."
+                return
+        raise VkValidationError("User validation failed.")
 
     def isAuth(self):
         u"""Проверяет авторизован ли пользователь."""
@@ -76,22 +91,19 @@ class VkClient(object):
         if 'error' in r:
             error=r['error']
             if error['error_code'] == 14:
-                self.addCaptchaParams(params, error)
+                params['captcha_sid']=error['captcha_sid']
+                params['captcha_key']=self.solveCaptcha(error['captcha_img'])
             elif error['error_code'] == 17:
                 # Получаем новый access_token.
-                self.validate(error['redirect_uri'])
+                self.apiValidate(error['redirect_uri'])
             else:
                 raise VkApiError(error['error_code'], error['error_msg'])
             # Отправляем запрос повторно.
             return self.api(method, params)
         return r['response']
 
-    # <VkClient>.<МЕТОД_API_ВКОНТАКТЕ>(<СЛОВАРЬ_ИЛИ_ИМЕНОВАННЫЕ_АРГУМЕНТЫ>)
-    # <VkClient>.users.get(user_id=1)
-    # <VkClient>.users.get({'user_id': 1}) 
-    # <VkClient>.api('users.get', {'user_id': 1})
-    def __getattr__(self, name):
-        return VkApiMethod(self, name)
+    def apiValidate(self, redirect_uri):
+        raise VkValidationError("User validation required.")
 
     def upload(self, url, files):
         _files={}
@@ -114,13 +126,12 @@ class VkClient(object):
     def solveCaptcha(self, image_url):
         raise VkCaptchaError("CAPTCHA required.")
 
-    def validate(self, redirect_uri):
-        raise VkValidationError("User validation required.")
-
-    def addCaptchaParams(self, request_params, captcha_params):
-        request_params['captcha_sid']=captcha_params['captcha_sid']
-        captcha_key=self.solveCaptcha(captcha_params['captcha_img'])
-        request_params['captcha_key']=captcha_key
+    # <VkClient>.<МЕТОД_API_ВКОНТАКТЕ>(<СЛОВАРЬ_ИЛИ_ИМЕНОВАННЫЕ_АРГУМЕНТЫ>)
+    # <VkClient>.users.get(user_id=1)
+    # <VkClient>.users.get({'user_id': 1}) 
+    # <VkClient>.api('users.get', {'user_id': 1})
+    def __getattr__(self, name):
+        return VkApiMethod(self, name)
 
 class VkApiMethod(object):
     def __init__(self, client, name):
@@ -138,24 +149,24 @@ class VkApiMethod(object):
 class VkClientError(Exception):
     pass
 
-class VkCaptchaError(VkClientError):
-    pass
-
-class VkValidationError(VkClientError):
-    pass
-
 class VkAuthorizationError(VkClientError):
-     def __init__(self, error_type, error_description):
+    def __init__(self, error, error_description):
         super(VkAuthorizationError, self)\
-            .__init__("{}: {}".format(error_type, error_description))
-        self.type=error_type
+            .__init__("{} {}".format(error, error_description))
+        self.type=error
 
 class VkApiError(VkClientError):
     def __init__(self, error_code, error_msg):
         super(VkApiError, self)\
-            .__init__("[{}] {}".format(error_code,error_msg))
+            .__init__("{} {}".format(error_code, error_msg))
         self.code=error_code
 
 class VkUploadError(VkClientError):
+    pass
+
+class VkCaptchaError(VkClientError):
+    pass
+
+class VkValidationError(VkClientError):
     pass
     
