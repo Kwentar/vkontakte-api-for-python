@@ -5,5 +5,6 @@ vkontakte-api-for-python
 
 Требования:
 
-1) Python 2.7.x
-2) Requests
+* Python 2.7.x
+* Requests
+* PyQt4
