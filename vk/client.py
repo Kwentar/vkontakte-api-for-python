@@ -4,9 +4,11 @@ import requests
 import datetime
 import re
 import os
+import time
 
 USER_AGENT="VkClient v1.05 (Python {}.{}.{})".format(*sys.version_info[:3])
 API_VERSION=5.27
+API_DELAY=0.21
 
 class VkClient(object):
     user_id=0
@@ -15,12 +17,13 @@ class VkClient(object):
     session.headers['User-Agent']=USER_AGENT
 
     def __init__(self, client_id=0,  client_secret='', permissions='',\
-                 access_token='', api_version=API_VERSION):
+                 access_token='', api_version=0, api_delay=0):
         self.client_id=client_id
         self.client_secret=client_secret
         self.permissions=permissions
         self.access_token=access_token
-        self.api_version=api_version
+        self.api_version=api_version or API_VERSION
+        self.api_delay=api_delay or API_DELAY
 
     # https://vk.com/dev/auth_direct
     def authDirect(self, username, password, captcha_sid=0, captcha_key=0):
@@ -82,6 +85,9 @@ class VkClient(object):
         return False
 
     def api(self, method, params={}):
+        # Ждем.
+        if self.api_delay:
+            time.sleep(self.api_delay)
         params=dict(params)
         params['access_token']=self.access_token
         params['v']=self.api_version
