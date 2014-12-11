@@ -1,4 +1,9 @@
 vkontakte-api-for-python
 ========================
 
-API Вконтакте для Python
+Вконтакте API для Python
+
+Требования:
+
+1) Python 2.7.x
+2) Requests
