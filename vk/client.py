@@ -6,8 +6,6 @@ import os
 
 USER_AGENT='VkClient'
 API_VERSION=5.27
-AUTH_TOKEN_URL='https://oauth.vk.com/token'
-API_URL='https://api.vk.com/method/{method}'
 
 class VkClient(object):
     user_id=0
@@ -48,7 +46,7 @@ class VkClient(object):
         params['client_secret']=self.client_secret
         params['scope']=self.permissions
         params['grant_type']='password'
-        self.authRequest(AUTH_TOKEN_URL, params)
+        self.authRequest('https://oauth.vk.com/token', params)
 
     def authSite(self):
         raise VkClientError("Not implemented yet.")
@@ -59,11 +57,20 @@ class VkClient(object):
     def authServer(self):
         raise VkClientError("Not implemented yet.")
 
+    def isAuth(self):
+        u"""Проверяет авторизован ли пользователь."""
+        try:
+            if self.users.isAppUser():
+                return True
+        except VkApiError, e:
+            pass
+        return False
+
     def api(self, method, params={}):
         params=dict(params)
         params['access_token']=self.access_token
         params['v']=self.api_version
-        url=API_URL.format(method=method)
+        url='https://api.vk.com/method/{}'.format(method)
         r=self.session.post(url, data=params).json()
         if 'error' in r:
             error=r['error']
@@ -108,14 +115,6 @@ class VkClient(object):
 
     def validate(self, redirect_uri):
         raise VkValidationError("User validation required.")
-
-    def checkAccessToken(self):
-        try:
-            if self.users.isAppUser():
-                return True
-        except VkApiError, e:
-            pass
-        return False
 
     def addCaptchaParams(self, request_params, captcha_params):
         request_params['captcha_sid']=captcha_params['captcha_sid']
