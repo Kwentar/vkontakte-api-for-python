@@ -144,9 +144,8 @@ class LongPoll(object):
         self._ts=r['ts']
 
     def _getServerUrl(self):   
-        url='https://{}?act=a_check&key={}&ts={}&wait={}&mode={}'\
-             .format(self._server, self._key, self._ts, self._wait, self._mode)
-        return url
+        return 'https://{}?act=a_check&key={}&ts={}&wait={}&mode={}'\
+            .format(self._server, self._key, self._ts, self._wait, self._mode)
 
 class LongPollError(Exception):
     pass
