@@ -44,8 +44,7 @@ class VkClient(object):
             elif r['error'] == 'need_validation':
                 self.authValidate(r['redirect_uri'])
             else:
-                raise VkAuthorizationError("{error}: {error_description}"\
-                                           .format(**r))
+                raise VkAuthorizationError(r['error'], r['error_description'])
             return self.authDirect(username, password, captcha_sid,
                                    captcha_key)
         self.access_token=r['access_token']
