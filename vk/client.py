@@ -4,7 +4,7 @@ import datetime
 import re
 import os
 
-USER_AGENT='VkClient'
+USER_AGENT='VkClient v1.0'
 API_VERSION=5.27
 
 class VkClient(object):
