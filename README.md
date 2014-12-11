@@ -9,9 +9,10 @@
 
 Постим геев на стеночку в уютненький контактик.
 
+code-block:: python
     # -*- coding: utf-8 -*-
     from vk.client import *
-
+    
     # Притворяемся официальным приложением для iPhone.
     vk=VkClient(client_id=3140623, client_secret='VeWdmVclDCtn6ihuP1nt')
     # Авторизуемся напрямую.
