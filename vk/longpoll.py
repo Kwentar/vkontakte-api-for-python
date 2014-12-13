@@ -98,7 +98,7 @@ class LongPoll(object):
 
     def __init__(self, client, mode=2, wait=25):
         """
-        :param VkClient client: экземпляр client.VkClient.
+        :param client: должен быть унаследован от Api.
         :param int mode: параметр, определяющий наличие поля прикреплений в 
             получаемых данных с помощью битовой маски. Cумма номеров 
             необходимых опций: 2 - получать прикрепления, 8 - возвращать 
@@ -128,24 +128,24 @@ class LongPoll(object):
     def _start(self):
         self._connect()
         while self._running:
-            url=self._getServerUrl()
+            url='https://{}?act=a_check&key={}&ts={}&wait={}&mode={}'.format(
+                self._server, self._key, self._ts, self._wait, self._mode)
             r=self.client.session.get(url).json()
             if 'updates' in r:
                 self._ts=r['ts']
                 self.onUpdateMessages(r['updates'], r['ts'], r.get('pts'))
                 continue
-            # Соединение потеряно.
-            self._connect()
+            if r.get('failed') == 2: # Соединение потеряно.
+                self._connect()
+            else:
+                raise LongPollError("Unknown error")
 
     def _connect(self):
         r=self.client.messages.getLongPollServer(use_ssl=1)
         self._server=r['server']
         self._key=r['key']
         self._ts=r['ts']
-
-    def _getServerUrl(self):   
-        return 'https://{}?act=a_check&key={}&ts={}&wait={}&mode={}'\
-            .format(self._server, self._key, self._ts, self._wait, self._mode)
+            
 
 class LongPollError(Exception):
     pass
