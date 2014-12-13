@@ -29,11 +29,11 @@ class Api(object):
             elif code == 10:
                 raise InternalServerError(r['error'])
             elif code == 14:
-                return self.onCaptcha(CaptchaNeeded(r['error']))
+                return self.handleCaptcha(CaptchaNeeded(r['error']))
             elif code == 15:
                 raise AccessDenied(r['error'])
             elif code == 17:
-                return self.onValidation(ValidationRequired(r['error']))
+                return self.handleValidation(ValidationRequired(r['error']))
             elif code == 113:
                 raise InvalidUserId(r['error'])
             elif code == 200:
@@ -48,8 +48,11 @@ class Api(object):
                 raise ApiError(r['error'])
         return r['response']
 
-    def onCaptcha(self, error):
+    def handleCaptcha(self, error):
         # Do smth with error.captcha_img and error.captcha_sid
+        # error.params['captcha_sid']=error.captcha_sid
+        # error.params['captcha_key']=captcha_key
+        # return self.api(error.method, error.params)
         raise error
 
     def onValidation(self, error):
@@ -75,4 +78,4 @@ if __name__ == '__main__':
     vk=Api()
     r=vk.users.get(user_id=1)
     print u"#{id} {first_name} {last_name}".format(**r[0])
-    input("Press Enter to exit.")
+    raw_input("Press Enter to exit.")
