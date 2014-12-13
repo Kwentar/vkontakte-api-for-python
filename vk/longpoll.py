@@ -94,7 +94,10 @@ WINDOWS=6 # Официальное приложение для Windows 8
 WEB=7 # Полная версия сайта или неопознанное приложение
 
 class LongPoll(object):
-    _running=False
+    running=False
+    _server=None
+    _key=None
+    _ts=None
 
     def __init__(self, client, mode=2, wait=25):
         """
@@ -110,26 +113,26 @@ class LongPoll(object):
         :param int wait: время удержания ответа сервером.
         """
         self.client=client
-        self._mode=mode
-        self._wait=wait
+        self.mode=mode
+        self.wait=wait
 
     def onUpdateMessages(self, updates, ts, pts):
         print updates, ts, pts
 
     def start(self):
-        if self._running:
+        if self.running:
             raise LongPollError("Already started.")
         threading.Thread(target=self._start).start()
-        self._running=True
+        self.running=True
 
     def stop(self):
-        self._running=False
+        self.running=False
 
     def _start(self):
         self._connect()
-        while self._running:
+        while self.running:
             url='https://{}?act=a_check&key={}&ts={}&wait={}&mode={}'.format(
-                self._server, self._key, self._ts, self._wait, self._mode)
+                self._server, self._key, self._ts, self.wait, self.mode)
             r=self.client.session.get(url).json()
             if 'updates' in r:
                 self._ts=r['ts']

@@ -50,9 +50,10 @@ class Api(object):
 
     def handleCaptcha(self, error):
         # Do smth with error.captcha_img and error.captcha_sid
-        # error.params['captcha_sid']=error.captcha_sid
-        # error.params['captcha_key']=captcha_key
-        # return self.api(error.method, error.params)
+        # params=dict(error.params)
+        # params['captcha_sid']=error.captcha_sid
+        # params['captcha_key']=captcha_key
+        # return self.api(error.method, params)
         raise error
 
     def handleValidation(self, error):
