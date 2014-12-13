@@ -55,7 +55,7 @@ class Api(object):
         # return self.api(error.method, error.params)
         raise error
 
-    def onValidation(self, error):
+    def handleValidation(self, error):
         raise error
 
     def __getattr__(self, name):
