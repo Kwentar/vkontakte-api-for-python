@@ -38,7 +38,7 @@ vk.wall.post(message="Тестовое сообщение.")
 ### Установка PyQt
 
 Переходим по [ссылке](http://www.riverbankcomputing.com/software/pyqt/download).
-Находим ссылку на скачивание PyQt4 для Python 2.7 x64 или x32(в отличие от 
+Находим ссылку на скачивание PyQt4 для Python 2.7 x64 или x32(в зависимости от 
 того какой разрядности у вас Windows). Устанавливаем.
 
 ### Установка Requests
