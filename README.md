@@ -7,14 +7,22 @@
 
 ## Использование
 
-Постим запись на стеночку:
+Постим коня на стеночку:
 
 ```Python
 # -*- coding: utf-8 -*-
-from guiclient import *
+from vkclient import *
 
 vk = VkClient()
-vk.wall.post(message="Тестовое сообщение.")
+url = vk.photos.getWallUploadServer()['upload_url']
+# Загружать файлы можно по ссылке.
+upload_result = vk.upload(url, {'photo': 'http://images4.fanpop.com/image/photos/20500000/Fluttershy-my-little-pony-friendship-is-magic-20524085-570-402.jpg'})
+photos = vk.photos.saveWallPhoto(upload_result)
+post = vk.wall.post(message="Я люблю разноцветных коней.", attachment="photo{owner_id}_{id}".format(**photos[0]))
+
+# Откроем в стандартном браузере запись.
+import webbrowser
+webbrowser.open("https://vk.com/wall{}_{}".format(vk.userId, post['post_id']))
 ```
 В первый раз будет вызван диалог с авторизацией. 
 
@@ -28,28 +36,28 @@ access_token.txt. В случае необходимости будет выве
 
 ## Требования
 
-Для работы с модулем нужны:
+Для работы с модулями:
 
 1. Python 2.7.x
-2. Библиотека Requests
-3. PyQt
+2. Requests
+3. PyQt4
 
 ## Установка Python, библиотек и настройка системы
 
 ### Установка Python
 
 Пареходим по [ссылке](https://www.python.org/downloads/) и находим на странице 
-большую кнопку "Download Python 2.7.9". Скачиваем, устанавливаем.
+большую кнопку "Download Python 2.7.9".
 
-### Установка PyQt
+### Установка PyQt4
 
 Переходим по [ссылке](http://www.riverbankcomputing.com/software/pyqt/download).
-Находим ссылку на скачивание PyQt4 для Python 2.7 x64 или x32(в отличие от 
-того какой разрядности у вас Windows). Устанавливаем.
+Находим ссылку на скачивание PyQt4 для Python 2.7 x64 или x32(в зависимости от 
+того какой разрядности у вас Windows).
 
 ### Установка Requests
 
-Вызываем диалог "Выполнить" сочетанием клавиш Windows+R. Вбиваем в поле cmd и 
+Вызываем диалог Выполнить сочетанием клавиш Windows+R. Вбиваем в поле cmd и 
 нажимаем Enter. В командной строке набираем:
 
     pip install requests
@@ -67,4 +75,4 @@ access_token.txt. В случае необходимости будет выве
 Дополнительно.
 4. Выбираем переменную PATH, нажимаем кнопку "Изменить...".
 5. Добавляем в конец строки ";C:\Python27;C:\Python27\Scripts"(без кавычек), 
-нажимаем ОК. Заметьте, что точка с запятой является разделителем путей.
+нажимаем ОК.

@@ -135,8 +135,8 @@ class VkApi(object):
         """Метод для тестирования загрузки фото на стену."""
         args = {'group_id': group_id} if group_id else {} 
         upload_url = self.photos.getWallUploadServer(args)['upload_url']
-        result = self.upload(upload_url, {'photo': photo})
-        photos = self.photos.saveWallPhoto(result)
+        upload_result = self.upload(upload_url, {'photo': photo})
+        photos = self.photos.saveWallPhoto(upload_result)
         # attachment = "photo{owner_id}_{id}".format(**photos[0])
         # return attachment
         return photos
