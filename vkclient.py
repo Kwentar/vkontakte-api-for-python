@@ -10,7 +10,7 @@ __license__ = "GNU General Public License v. 3"
 __all__ = ('VkClient', 'VkError')
 
 TOKEN_FILE = 'access_token.txt'
-LOGIN_ERROR_TITLE = u"Ощибка авторизации"
+LOGIN_ERROR_TITLE = u"Ошибка авторизации"
 LOGIN_ERROR_MESSAGE = u"<b>Ошибка:</b> {error} - {error_description}"
 
 class CaptchaDialog(QtGui.QDialog, Ui_CaptchaDialog):
