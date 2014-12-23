@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 from vkapi import VkApi, VkError
 from ui.login import Ui_LoginDialog
 from ui.captcha import Ui_CaptchaDialog
-import re
+import os
 
 __author__ = "Sergey Codobear <tz4678@gmail.com>"
 __license__ = "GNU General Public License v. 3"
@@ -123,6 +123,16 @@ class VkClient(VkApi):
             args['captcha_key'] = captcha_key
             args['captcha_sid'] = error.captchaSid
             return self.call(error.method, args)
+        
+    def logout(self):
+        self.isAuthed = False
+        self.userId = None
+        self.accessToken = None
+        
+        try:
+            os.unlink(self.tokenFile)
+        except:
+            pass
         
 if __name__ == '__main__':
     vk = VkClient()
