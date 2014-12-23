@@ -74,15 +74,15 @@ FIXED = 256 # сообщение проверено пользователем �
 MEDIA = 512 # сообщение содержит медиаконтент
 
 class LongPoll(object):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, api):
+        self.api = api
         self.server = None
         self.key = None
         self.ts = None
         self.running = None
         
     def setUp(self):
-        r = self.client.messages.getLongPollServer(use_ssl=1)
+        r = self.api.messages.getLongPollServer(use_ssl=1)
         self.server = r['server']
         self.key = r['key']
         self.ts = r['ts']
@@ -100,7 +100,7 @@ class LongPoll(object):
                         ts=self.ts, 
                         wait=25, 
                         mode=2)      
-            r = self.client.http.post('https://' + self.server, args).json()
+            r = self.api.http.post('https://' + self.server, args).json()
             
             if 'updates' in r:
                 self.ts = r['ts']

@@ -7,20 +7,20 @@ import urlparse
 
 __author__ = "Sergey Codobear <tz4678@gmail.com>"
 __license__ = "GNU General Public License v. 3"
-__all__ = ('Client', 'ClientError', 'VkError')
+__all__ = ('VkApi', 'VkError')
 
 DEFAULT_API_VERSION = 5.27
 DEFAULT_API_DELAY = 0.34
 
-class Client(object):
-    """Базовый клиент для работы с API Вконтакте. Работает с версией API > 3.
+class VkApi(object):
+    """Класс для работы с API Вконтакте. Работает с версией API > 3.
         
     К методам API можно обращаться как к методам класса:
-        <object Client>.users.get(user_id=123)
+        <object VkApi>.users.get(user_id=123)
     Вместо именованных аргументов можно первым аргументом передавать словарь:
-        <object Client>.users.get({'user_id': 123})
+        <object VkApi>.users.get({'user_id': 123})
     Это аналогично такой записи:
-        <object Client>.api('users.get', {'user_id': 123})
+        <object VkApi>.call('users.get', {'user_id': 123})
         
     Список методов API находится здесь <http://vk.com/dev/methods>.
     """   
@@ -38,6 +38,7 @@ class Client(object):
             сгенерирована ошибка.
         """
         self.accessToken = accessToken
+        
         self.apiVersion = apiVersion
         
         if self.apiVersion is None:
@@ -50,7 +51,7 @@ class Client(object):
         
         self.http = requests.session()
 
-    def api(self, method, params=None):
+    def call(self, method, params=None):
         """Отправляет запрос к API.
         
         :param method: Имя метода.
@@ -88,7 +89,7 @@ class Client(object):
     
     def execute(self, code, **params):
         params['code'] = code
-        return self.api('execute', params)
+        return self.call('execute', params)
 
     def captchaHandler(self, error):
         raise error
@@ -127,11 +128,7 @@ class Client(object):
             filename = os.path.basename(filename)
             files[key] = (filename, content)
             
-        r = self.http.post(upload_url, files=files).json()  
-        
-        if 'error' in r:
-            raise ClientError(r['error'])
-        
+        r = self.http.post(upload_url, files=files).json()
         return r
     
     def uploadWallPhoto(self, photo, group_id=None):
@@ -150,8 +147,8 @@ class Client(object):
             return ComplexMethod(self, name) 
     
 class ComplexMethod(object):
-    def __init__(self, client, prefix):
-        self._client = client
+    def __init__(self, api, prefix):
+        self._api = api
         self._prefix = prefix
         
     def __getattr__(self, name):
@@ -160,17 +157,15 @@ class ComplexMethod(object):
                 dict.update(arg[0], kw)
                 kw = arg[0]
                 
-            return self._client.api(self._prefix + '.' + name, kw)
+            return self._api.call(self._prefix + '.' + name, kw)
         
         # Имена методов должны быть в camelCase. 
         if re.match('[a-z]+([A-Z][a-z]+)*$', name):
             return wrapper
-    
-class ClientError(Exception): pass
-    
-# Ошибка генерируются клиентом, а значит должна наследоваться от ClientError.
-class VkError(ClientError):
+        
+class VkError(Exception):
     def __init__(self, details):
+        Exception.__init__(self)
         self.code = details['error_code']
         self.message = details['error_msg']
         # Параметры капчи.
