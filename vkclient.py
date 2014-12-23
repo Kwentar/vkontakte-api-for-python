@@ -43,7 +43,7 @@ class LoginDialog(QtGui.QDialog, Ui_LoginDialog):
                     scope=self.client.scope,
                     grant_type='password')
 
-        if captcha_key == False:
+        if captcha_key:
             args['captcha_key'] = captcha_key
             args['captcha_sid'] = captcha_sid
 
@@ -54,7 +54,7 @@ class LoginDialog(QtGui.QDialog, Ui_LoginDialog):
                 captcha_key = self.client.solveCaptcha(r['captcha_img'])
                 
                 # Если введена капча отправляем запрос еще раз.
-                if captcha_key:
+                if captcha_key != False:
                     self.login(username, 
                                password, 
                                captcha_key, 
@@ -118,7 +118,7 @@ class VkClient(VkApi):
     def captchaHandler(self, error):
         captcha_key = self.solveCaptcha(error.captchaImg)
         
-        if captcha_key == False:
+        if captcha_key != False:
             args = dict(error.params)
             args['captcha_key'] = captcha_key
             args['captcha_sid'] = error.captchaSid
