@@ -15,14 +15,19 @@ DEFAULT_API_DELAY = 0.34
 class VkApi(object):
     """Класс для работы с API Вконтакте. Работает с версией API > 3.
         
-    К методам API можно обращаться как к методам класса:
+    Методы API Вконтакте можно вызывать в удобном виде:
+    
         <object VkApi>.users.get(user_id=123)
+        
     Вместо именованных аргументов можно первым аргументом передавать словарь:
+    
         <object VkApi>.users.get({'user_id': 123})
+        
     Это аналогично такой записи:
+    
         <object VkApi>.call('users.get', {'user_id': 123})
         
-    Список методов API находится здесь <http://vk.com/dev/methods>.
+    Список методов API Внонтакте находится здесь <http://vk.com/dev/methods>.
     """   
     def __init__(self, accessToken=None, apiVersion=None, apiDelay=None):
         """Конструктор.
